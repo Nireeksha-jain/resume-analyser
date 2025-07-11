@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Keyword Assistant– ATS Resume Checker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="split-container">
+    <!-- LEFT PANEL -->
+    <div class="left-panel">
+        <div class="form-section">
+            <h2>Keyword Assistant</h2>
+            <p class="form-subtitle">Paste the job description and upload your resume to check ATS compatibility.</p>
+
+            <form method="POST" enctype="multipart/form-data">
+                <label>📄 Upload Resume (PDF or TXT)</label>
+                <input type="file" name="resume" id="resumeInput">
+                {% if resume_filename %}
+                    <p id="resumeStatus">✅ Selected: {{ resume_filename }}</p>
+                {% else %}
+                    <p id="resumeStatus" style="color: #b71c1c;">❌ No resume uploaded yet</p>
+                {% endif %}
+
+                <label>📝 Paste Job Description</label>
+                <textarea name="jd" rows="12" required>{{ jd_text if jd_text else "" }}</textarea>
+
+                <button type="submit">🚀 Analyze Resume</button>
+                <div id="loading-spinner" class="spinner hidden"></div>
+            </form>
+
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <div class="error">{{ messages[0] }}</div>
+              {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel">
+        {% if matched_keywords %}
+        <div class="results-section">
+            <div class="result-box">
+                <h3>✅ Matched Keywords</h3>
+                <div class="tag-list">
+                    {% for word in matched_keywords %}
+                        <span class="tag matched">{{ word }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="result-box">
+                <h3>❌ Missing Keywords</h3>
+                <div class="tag-list">
+                    {% for word in missing_keywords %}
+                        <span class="tag missing">{{ word }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="result-box">
+                <h3>📢 Power Verbs Present</h3>
+                <div class="tag-list">
+                    {% for word in power_verbs_found %}
+                        <span class="tag verb-found">{{ word }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="result-box">
+                <h3>💡 Suggested Power Verbs</h3>
+                <div class="tag-list">
+                    {% for word in power_verbs_suggested %}
+                        <span class="tag verb-suggested">{{ word }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    const form = document.querySelector('form');
+    const spinner = document.getElementById('loading-spinner');
+    const input = document.getElementById('resumeInput');
+    const status = document.getElementById('resumeStatus');
+
+    form.addEventListener('submit', () => {
+        spinner.classList.remove('hidden');
+    });
+
+    input.addEventListener("change", () => {
+        if (input.files.length > 0) {
+            status.innerHTML = `✅ Selected: ${input.files[0].name}`;
+            status.style.color = "#1c1c1e";
+        } else {
+            status.innerHTML = "❌ No resume uploaded yet";
+            status.style.color = "#b71c1c";
+        }
+    });
+</script>
+</body>
+</html>
